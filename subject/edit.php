@@ -1,84 +1,76 @@
 <?php
-    session_start();
-    $pageTitle = "Edit";
-    include '../header.php';
-    include '../functions.php';
-    //guard();  // Protect the page to ensure only logged-in users can access
+session_start();
 
-    // Retrieve student data using index from session or redirect if not found
-    if (isset($_GET['index'])) {
-        $index = $_GET['index'];
+// Check if the user is logged in; if not, redirect to login page
+if (!isset($_SESSION['email'])) {
+    header("Location: ../index.php");
+    exit();
+}
 
-        // Get the student data by index
-        $student = getSelectedStudentData($index);
-        if (!$student) {
-            header("Location: register.php");  // Redirect if student not found
-            exit;
-        }
+// Initialize error message
+$error = '';
+
+// Check if the 'index' parameter is set and valid
+if (isset($_GET['index'])) {
+    $index = (int) $_GET['index'];
+
+    // Check if the subject exists at the given index in the session
+    if (isset($_SESSION['subject_data'][$index])) {
+        $subject = $_SESSION['subject_data'][$index]; // Get the subject data
     } else {
-        header("Location: register.php");  // Redirect if no index provided
-        exit;
+        $error = "Subject not found!";
     }
+} else {
+    $error = "No subject selected for editing!";
+}
 
-    // Handle form submission to update student data
-    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-        $updated_data = [
-            'student_id' => $_POST['student_id'],
-            'first_name' => $_POST['first_name'],
-            'last_name' => $_POST['last_name']
+// Handle form submission
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $subjectCode = trim($_POST['subject_code']);
+    $subjectName = trim($_POST['subject_name']);
+
+    // Validation to ensure both fields are filled
+    if (empty($subjectCode) || empty($subjectName)) {
+        $error = "Both subject code and subject name are required.";
+    } else {
+        // Update the subject data in the session
+        $_SESSION['subject_data'][$index] = [
+            'subject_code' => $subjectCode,
+            'subject_name' => $subjectName
         ];
 
-        // Update student data in the session
-        $_SESSION['student_data'][$index] = $updated_data;
-        header("Location: register.php");  // Redirect after updating
-        exit;
+        // Redirect back to the dashboard after updating
+        header("Location: ../dashboard.php");
+        exit();
     }
+}
 ?>
 
-<main>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Edit Subject</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+</head>
+<body>
+    <div class="container">
+        <h2 class="mt-5">Edit Subject</h2>
 
-<div class="container justify-content-between align-items-center col-8">
-
-    <h3 class=" mt-4">Edit Student</h3>
-
-    <!-- breadcrumb -->
-    <div class="w-100 mt-5">
-        <div class="container justify-content-between align-items-center bg-light p-2 border r-4 ">
-            <nav aria-label="breadcrumb">
-                <ol class="breadcrumb mb-0">
-                    <li class="breadcrumb-item"><a href="../dashboard.php">Dashboard</a></li>
-                    <li class="breadcrumb-item"><a href="register.php">Register Student</a></li>
-                    <li class="breadcrumb-item active" aria-current="page">Edit Student</li>
-                </ol>
-            </nav>
-        </div>
-    </div>
-    
-    <div class=" border border-secondary-1 p-5 mt-3" >
-
-        <!-- Edit Student Form -->
-        <form method="POST" action="">
-            <div class="mb-3">
-                <label for="student_id" class="form-label">Student ID</label>
-                <input type="text" class="form-control bg-light" id="student_id" name="student_id" value="<?php echo htmlspecialchars($student['student_id']); ?>" readonly>
+        <?php if ($error): ?>
+            <div class="alert alert-danger">
+                <?php echo $error; ?>
             </div>
+        <?php endif; ?>
 
-            <div class="mb-3">
-                <label for="first_name" class="form-label">First Name</label>
-                <input type="text" class="form-control" id="first_name" name="first_name" value="<?php echo htmlspecialchars($student['first_name']); ?>" required>
-            </div>
-
-            <div class="mb-3">
-                <label for="last_name" class="form-label">Last Name</label>
-                <input type="text" class="form-control" id="last_name" name="last_name" value="<?php echo htmlspecialchars($student['last_name']); ?>" required>
-            </div>
-
-            <button type="submit" class="btn btn-primary">Update Student</button>
-        </form>
-    </div>
-</div>
-</main>
-
-<?php
-    include '../footer.php';
-?>
+        <?php if (isset($subject)): ?>
+            <form method="POST" action="edit.php?index=<?php echo $index; ?>">
+                <div class="form-group">
+                    <label for="subject_code">Subject Code:</label>
+                    <input type="text" name="subject_code" class="form-control" value="<?php echo htmlspecialchars($subject['subject_code']); ?>" required>
+                </div>
+                <div class="form-group">
+                    <label for="subject_name">Subject Name:</label>
+                    <input type="text" name="subject_name" class="form-control" value="<?php echo htmlspecialchars($subject['subject_name']); ?>" required>
+                </div>
+   

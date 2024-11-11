@@ -4,10 +4,10 @@
 function getUsers() {
     return [
         ["email" => "lopezshiellamae62@gmail.com", "password" => "admin1"],
-        ["email" => "lopezshiellamae62@gmail.com", "password" => "admin2"],
-        ["email" => "lopezshielamae62@gmail.com", "password" => "admin3"],
-        ["email" => "lopezshiellamae62@gmail.com", "password" => "admin4"],
-        ["email" => "lopezshielamae62@gmail.com", "password" => "admin5"]
+        ["email" => "lopez@gmail.com", "password" => "admin2"],
+        ["email" => "shiella@gmail.com", "password" => "admin3"],
+        ["email" => "123@gmail.com", "password" => "user"],
+        ["email" => "lopezshielamae62@gmail.com", "password" => "123"]
     ];
 }
 

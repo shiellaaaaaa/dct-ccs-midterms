@@ -1,135 +1,62 @@
 <?php
 session_start();
-
-$pageTitle = "Register Student";
-include '../header.php'; // Corrected path to header.php
-include '../functions.php'; // Corrected path to functions.php
-guard();
-
-$errors = [];
-$student_data = [];
-
-// Initialize the student data array if it doesn't exist
-if (!isset($_SESSION['student_data'])) {
-    $_SESSION['student_data'] = [];
+if (!isset($_SESSION['email'])) {
+    header("Location: ../index.php");
+    exit();
 }
 
-// Process the form submission for registering a student
-if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-    // Get student data from the form
-    $student_data = [
-        'student_id' => $_POST['student_id'],
-        'first_name' => $_POST['first_name'],
-        'last_name' => $_POST['last_name']
-    ];
+$errors = [];
 
-    // Validate the student data
-    $errors = validateStudentData($student_data);
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $studentId = $_POST['student_id'];
+    $firstName = $_POST['first_name'];
+    $lastName = $_POST['last_name'];
 
-    // Check for duplicate student ID using getSelectedStudentIndex()
-    if (empty($errors)) {
-        $duplicate_index = getSelectedStudentIndex($student_data['student_id']);
-        if ($duplicate_index !== null) {
-            $errors[] = "Student ID " . htmlspecialchars($student_data['student_id']) . " already exists.";
-        } else {
-            // Store student in session if no duplicates
-            $_SESSION['student_data'][] = $student_data;
-            header("Location: register.php"); // Redirect to refresh the page
-            exit;
-        }
+    // Basic validation
+    if (empty($studentId) || empty($firstName) || empty($lastName)) {
+        $errors[] = "All fields are required.";
+    } else {
+        $_SESSION['student_data'][] = [
+            'student_id' => $studentId,
+            'first_name' => $firstName,
+            'last_name' => $lastName
+        ];
+        header("Location: ../dashboard.php");
+        exit();
     }
 }
 ?>
 
-<main>
-    <div class="container justify-content-between align-items-center col-8">
-
-        <h2 class="m-4">Register a New Student</h2>
-
-        <!-- Breadcrumb -->
-        <div class="mt-4 w-100">
-            <div class="bg-light p-2 mb-4 border r-4">
-                <nav aria-label="breadcrumb">
-                    <ol class="breadcrumb mb-0">
-                        <li class="breadcrumb-item"><a href="../dashboard.php">Dashboard</a></li>
-                        <li class="breadcrumb-item active" aria-current="page">Register Student</li>
-                    </ol>
-                </nav>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Register Student</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+</head>
+<body>
+    <div class="container">
+        <h2 class="mt-5">Register Student</h2>
+        <?php if (!empty($errors)): ?>
+            <div class="alert alert-danger">
+                <?php echo implode('<br>', $errors); ?>
             </div>
-        </div>
-
-        <!-- Display error messages if form was submitted with errors -->
-        <?php if ($_SERVER['REQUEST_METHOD'] == 'POST' && !empty($errors)): ?>
-            <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                <strong>System Errors</strong>
-                <ul>
-                    <?php foreach ($errors as $error): ?>
-                        <li><?php echo htmlspecialchars($error); ?></li>
-                    <?php endforeach; ?>
-                </ul>
-                <button type="button" class="btn-close " data-bs-dismiss="alert" aria-label="Close"></button>            </div>
         <?php endif; ?>
-
-        <!-- Student Registration Form with Gray Border -->
-        <form method="POST" action="" class="border border-secondary-1 p-5 mb-4">
-            <div class="mb-3">
-                <label for="student_id" class="form-label">Student ID</label>
-                <input type="number" class="form-control" id="student_id" name="student_id" placeholder="Enter Student ID" >
+        <form method="POST" action="register.php">
+            <div class="form-group">
+                <label for="student_id">Student ID:</label>
+                <input type="text" name="student_id" class="form-control" required>
             </div>
-
-            <div class="mb-3">
-                <label for="first_name" class="form-label">First Name</label>
-                <input type="text" class="form-control" id="first_name" name="first_name" placeholder="Enter First Name" >
+            <div class="form-group">
+                <label for="first_name">First Name:</label>
+                <input type="text" name="first_name" class="form-control" required>
             </div>
-
-            <div class="mb-3">
-                <label for="last_name" class="form-label">Last Name</label>
-                <input type="text" class="form-control" id="last_name" name="last_name" placeholder="Enter Last Name" >
+            <div class="form-group">
+                <label for="last_name">Last Name:</label>
+                <input type="text" name="last_name" class="form-control" required>
             </div>
-
-            <button type="submit" class="btn btn-primary">Add Student</button>
+            <button type="submit" class="btn btn-primary">Register</button>
         </form>
-
-        <!-- List of Registered Students with Gray Border -->
-        <?php if (!empty($_SESSION['student_data'])): ?>
-            <div class="mt-3">
-                <div class="border border-secondary-1 p-5 mb-4">
-                    <h5>Student List</h5>
-                    <hr>
-                    <table class="table table-striped">
-                        <thead>
-                            <tr>
-                                <th>Student ID</th>
-                                <th>First Name</th>
-                                <th>Last Name</th>
-                                <th>Options</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <?php foreach ($_SESSION['student_data'] as $index => $student): ?>
-                                <tr>
-                                    <td><?php echo htmlspecialchars($student['student_id']); ?></td>
-                                    <td><?php echo htmlspecialchars($student['first_name']); ?></td>
-                                    <td><?php echo htmlspecialchars($student['last_name']); ?></td>
-                                    <td>
-                                        <!-- Edit Button -->
-                                        <a href="edit.php?index=<?php echo $index; ?>" class="btn btn-info btn-sm">Edit</a>
-
-                                        <!-- Delete Button -->
-                                        <a href="delete.php?index=<?php echo $index; ?>" class="btn btn-danger btn-sm">Delete</a>
-                                    </td>
-                                </tr>
-                            <?php endforeach; ?>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        <?php else: ?>
-            <!-- <p class="text-center">No students registered yet.</p> -->
-        <?php endif; ?>
     </div>
-</main>
-
-<?php
-include '../footer.php';
-?>
+</body>
+</html>
