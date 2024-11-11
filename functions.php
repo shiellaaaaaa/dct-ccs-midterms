@@ -1,12 +1,13 @@
 <?php
 
+
 function getUsers() {
     return [
         ["email" => "lopezshiellamae62@gmail.com", "password" => "admin1"],
-        ["email" => "lopezshiellamae622gmail.com", "password" => "admin2"],
-        ["email" => "lopezshiellamae62@.com", "password" => "admin3"],
-        ["email" => "lopezshielamae62@.com", "password" => "admin4"],
-        ["email" => "lopezshielamae62.com", "password" => "admin5"]
+        ["email" => "lopezshiellamae62@gmail.com", "password" => "admin2"],
+        ["email" => "lopezshielamae62@gmail.com", "password" => "admin3"],
+        ["email" => "lopezshiellamae62@gmail.com", "password" => "admin4"],
+        ["email" => "lopezshielamae62@gmail.com", "password" => "admin5"]
     ];
 }
 
@@ -36,11 +37,12 @@ function validateLoginCredentials($email, $password) {
 
     // Validate password
     if (empty($password)) {
-        $errors[] = "Password is required."; // Ensures password is provided
+        $errors[] = "Password is required.";
     }
 
     return $errors;
 }
+
 
 function checkLoginCredentials($email, $password, $users) {
     foreach ($users as $user) {
@@ -60,6 +62,8 @@ function checkUserSessionIsActive() {
     }
 }
 
+
+
 function guard() {
     if (empty($_SESSION['email']) && basename($_SERVER['PHP_SELF']) != 'index.php') {
         // Only redirect if the user is not logged in and is trying to access a protected page
@@ -68,7 +72,9 @@ function guard() {
     }
 }
 
+
 function displayErrors($errors) {
+    // <strong class='alert alert-danger'>System Errors</strong>
     $output = "<ul>";
     foreach ($errors as $error) {
         $output .= "<li>" . htmlspecialchars($error) . "</li>";
@@ -76,6 +82,9 @@ function displayErrors($errors) {
     $output .= "</ul>";
     return $output;
 }
+
+
+
 
 function renderErrorsToView($error) {
     if (empty($error)) {
@@ -121,6 +130,7 @@ function validateStudentData($student_data) {
         $errors[] = "Last Name is required.";
     }
 
+    // Optional: Add more validation rules as needed (e.g., length check, format validation)
     return $errors;
 }
 
@@ -142,5 +152,13 @@ function getSelectedStudentData($index) {
     }
     return false;
 }
+
+// Function to update student's name and last name by index
+// function updateStudent($index, $name, $lastname) {
+//     if (isset($_SESSION['student_data'][$index])) {
+//         $_SESSION['student_data'][$index]['name'] = $name;
+//         $_SESSION['student_data'][$index]['lastname'] = $lastname;
+//     }
+// }
 
 ?>
