@@ -74,3 +74,4 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <input type="text" name="subject_name" class="form-control" value="<?php echo htmlspecialchars($subject['subject_name']); ?>" required>
                 </div>
    
+        </body>
